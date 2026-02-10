@@ -1,0 +1,29 @@
+# docker-compose.yml
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dev-productivity-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devbot
+      POSTGRES_PASSWORD: devbot123
+      POSTGRES_DB: productivity_bot
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devbot -d productivity_bot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Comment out PgAdmin for now (we don't need it)
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   ...
+
+volumes:
+  postgres_data:
