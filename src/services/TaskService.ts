@@ -1,6 +1,6 @@
 // src/services/TaskService.ts
 
-import { PrismaClient, Task as PrismaTask, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import {
   Task,
   CreateTaskDTO,
@@ -267,18 +267,18 @@ export class TaskService {
   /**
    * Map Prisma task to service Task type
    */
-  private mapToTask(task: PrismaTask): Task {
+  private mapToTask(task: any): Task {
     return {
       id: task.id,
       title: task.title,
-      description: task.description,
+      description: task.description ?? undefined,
       status: task.status as TaskStatus,
       priority: task.priority as Priority,
-      dueDate: task.dueDate,
+      dueDate: task.dueDate ?? undefined,
       tags: task.tags,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
-      completedAt: task.completedAt,
+      completedAt: task.completedAt ?? undefined,
     };
   }
 }
