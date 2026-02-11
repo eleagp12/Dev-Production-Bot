@@ -1,8 +1,8 @@
 // src/commands/base/CommandRegistry.ts
 
-import { Command } from "./Command";
-import { CommandContext, CommandResponse } from "../../types/commands.types";
-import { logger } from "../../utils/logger";
+import { Command } from './Command';
+import { CommandContext, CommandResponse } from '../../types/commands.types';
+import { logger } from '../../utils/logger';
 
 /**
  * CommandRegistry manages all registered commands and handles
@@ -26,17 +26,14 @@ export class CommandRegistry {
   /**
    * Execute a command by name
    */
-  async execute(
-    commandName: string,
-    context: CommandContext,
-  ): Promise<CommandResponse> {
+  async execute(commandName: string, context: CommandContext): Promise<CommandResponse> {
     const command = this.commands.get(commandName);
 
     if (!command) {
       return {
         success: false,
         message: `Unknown command: ${commandName}`,
-        error: `Available commands: ${this.getCommandNames().join(", ")}`,
+        error: `Available commands: ${this.getCommandNames().join(', ')}`,
       };
     }
 
@@ -45,8 +42,8 @@ export class CommandRegistry {
       if (!command.validate(context)) {
         return {
           success: false,
-          message: "Invalid command input",
-          error: `Usage: ${command.usage}\n\nExamples:\n${command.examples.join("\n")}`,
+          message: 'Invalid command input',
+          error: `Usage: ${command.usage}\n\nExamples:\n${command.examples.join('\n')}`,
         };
       }
 
@@ -56,17 +53,15 @@ export class CommandRegistry {
       });
       const response = await command.execute(context);
 
-      logger.info(
-        `Command ${commandName} completed: ${response.success ? "success" : "failed"}`,
-      );
+      logger.info(`Command ${commandName} completed: ${response.success ? 'success' : 'failed'}`);
       return response;
     } catch (error) {
       logger.error(`Error executing command ${commandName}:`, error);
 
       return {
         success: false,
-        message: "Command execution failed",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: 'Command execution failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -116,17 +111,17 @@ export class CommandRegistry {
   getHelpText(): string {
     const commands = this.getAllCommands();
 
-    let help = "📚 Available Commands\n\n";
+    let help = '📚 Available Commands\n\n';
 
-    commands.forEach((cmd) => {
+    commands.forEach(cmd => {
       help += `**/${cmd.name}**\n`;
       help += `  ${cmd.description}\n`;
       help += `  Usage: ${cmd.usage}\n`;
       help += `  Examples:\n`;
-      cmd.examples.forEach((ex) => {
+      cmd.examples.forEach(ex => {
         help += `    ${ex}\n`;
       });
-      help += "\n";
+      help += '\n';
     });
 
     return help;
@@ -146,7 +141,7 @@ export class CommandRegistry {
     help += `${command.description}\n\n`;
     help += `**Usage:** ${command.usage}\n\n`;
     help += `**Examples:**\n`;
-    command.examples.forEach((ex) => {
+    command.examples.forEach(ex => {
       help += `  ${ex}\n`;
     });
 

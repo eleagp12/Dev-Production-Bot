@@ -1,6 +1,6 @@
 // src/commands/base/Command.ts
 
-import { CommandContext, CommandResponse } from "../../types/commands.types";
+import { CommandContext, CommandResponse } from '../../types/commands.types';
 
 /**
  * Base Command interface that all commands must implement
@@ -65,7 +65,7 @@ export abstract class Command {
    */
   protected getRequiredArg(
     context: CommandContext,
-    key: string,
+    key: string
   ): string | number | boolean | string[] {
     const value = context.args.get(key);
     if (value === undefined) {
@@ -77,11 +77,7 @@ export abstract class Command {
   /**
    * Helper method to get optional argument with default
    */
-  protected getOptionalArg<T>(
-    context: CommandContext,
-    key: string,
-    defaultValue: T,
-  ): T {
+  protected getOptionalArg<T>(context: CommandContext, key: string, defaultValue: T): T {
     const value = context.args.get(key);
     return (value as T) ?? defaultValue;
   }

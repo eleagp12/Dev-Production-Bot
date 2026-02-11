@@ -1,15 +1,15 @@
 // src/bot.ts
 
-import { PrismaClient } from "@prisma/client";
-import { CommandRegistry } from "./commands/base/CommandRegistry";
-import { AddTodoCommand } from "./commands/todo/AddTodoCommand";
-import { ListTodoCommand } from "./commands/todo/ListTodoCommand";
-import { DoneTodoCommand } from "./commands/todo/DoneTodoCommand";
-import { DeleteTodoCommand } from "./commands/todo/DeleteTodoCommand";
-import { TaskService } from "./services/TaskService";
-import { CommandResponse } from "./types/commands.types";
-import { parseCommand } from "./utils/parser";
-import { logger } from "./utils/logger";
+import { PrismaClient } from '@prisma/client';
+import { CommandRegistry } from './commands/base/CommandRegistry';
+import { AddTodoCommand } from './commands/todo/AddTodoCommand';
+import { ListTodoCommand } from './commands/todo/ListTodoCommand';
+import { DoneTodoCommand } from './commands/todo/DoneTodoCommand';
+import { DeleteTodoCommand } from './commands/todo/DeleteTodoCommand';
+import { TaskService } from './services/TaskService';
+import { CommandResponse } from './types/commands.types';
+import { parseCommand } from './utils/parser';
+import { logger } from './utils/logger';
 
 /**
  * DevProductivityBot - Main bot orchestrator
@@ -28,10 +28,7 @@ export class DevProductivityBot {
   constructor() {
     // Initialize Prisma
     this.prisma = new PrismaClient({
-      log:
-        process.env.NODE_ENV === "development"
-          ? ["query", "error", "warn"]
-          : ["error"],
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
 
     // Initialize services
@@ -43,7 +40,7 @@ export class DevProductivityBot {
     // Register commands
     this.registerCommands();
 
-    logger.info("DevProductivityBot initialized successfully - Phase 2");
+    logger.info('DevProductivityBot initialized successfully - Phase 2');
   }
 
   /**
@@ -56,7 +53,7 @@ export class DevProductivityBot {
     this.commandRegistry.register(new DoneTodoCommand(this.taskService));
     this.commandRegistry.register(new DeleteTodoCommand(this.taskService));
 
-    logger.info("Registered 4 todo commands");
+    logger.info('Registered 4 todo commands');
 
     // Future phases:
     // Phase 3: Focus commands
@@ -78,10 +75,7 @@ export class DevProductivityBot {
       const fullCommandName = subcommand ? `${command}-${subcommand}` : command;
 
       // Execute command
-      const response = await this.commandRegistry.execute(
-        fullCommandName,
-        context,
-      );
+      const response = await this.commandRegistry.execute(fullCommandName, context);
 
       logger.info(`Command processed: ${fullCommandName}`, {
         success: response.success,
@@ -89,12 +83,12 @@ export class DevProductivityBot {
 
       return response;
     } catch (error) {
-      logger.error("Error processing command:", error);
+      logger.error('Error processing command:', error);
 
       return {
         success: false,
-        message: "Failed to process command",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: 'Failed to process command',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -122,7 +116,7 @@ export class DevProductivityBot {
     return {
       totalCommands: this.commandRegistry.getCommandNames().length,
       taskCounts,
-      version: "0.2.0", // Phase 2 complete
+      version: '0.2.0', // Phase 2 complete
     };
   }
 
@@ -131,6 +125,6 @@ export class DevProductivityBot {
    */
   async close(): Promise<void> {
     await this.prisma.$disconnect();
-    logger.info("Database connection closed");
+    logger.info('Database connection closed');
   }
 }

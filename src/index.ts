@@ -1,112 +1,95 @@
 // src/index.ts
 
-import dotenv from "dotenv";
-import readline from "readline";
-import { DevProductivityBot } from "./bot";
-import { formatResponse } from "./utils/parser";
-import { logger } from "./utils/logger";
+import dotenv from 'dotenv';
+import readline from 'readline';
+import { DevProductivityBot } from './bot';
+import { formatResponse } from './utils/parser';
+import { logger } from './utils/logger';
 
-// Load environment variables
 dotenv.config();
 
-/**
- * Main entry point for the Dev Productivity Bot
- *
- * Provides a CLI interface for interacting with the bot
- */
-async function main() {
-  // Display welcome message
-  console.log("🤖 Dev Productivity Bot v1.0.0");
-  console.log("================================\n");
-  console.log("Your personal productivity assistant for developers.");
+function main(): void {
+  console.log('Dev Productivity Bot v1.0.0');
+  console.log('================================\n');
+  console.log('Your personal productivity assistant for developers.');
   console.log('Type "/help" for available commands or "exit" to quit.\n');
 
-  // Initialize bot
   const bot = new DevProductivityBot();
-
-  // Create readline interface
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: "> ",
+    prompt: '> ',
   });
 
-  // Display prompt
-  rl.prompt();
-
-  // Handle input
-  rl.on("line", async (input: string) => {
-    const trimmed = input.trim();
-
-    // Handle exit
-    if (trimmed.toLowerCase() === "exit" || trimmed.toLowerCase() === "quit") {
-      console.log("\n👋 Goodbye! Stay productive!\n");
-      await bot.close();
-      rl.close();
-      process.exit(0);
+  const shutdown = async (message?: string): Promise<void> => {
+    if (message) {
+      console.log(message);
     }
 
-    // Handle empty input
-    if (trimmed === "") {
+    await bot.close();
+    process.exit(0);
+  };
+
+  const handleLine = async (input: string): Promise<void> => {
+    const trimmed = input.trim();
+
+    if (trimmed.toLowerCase() === 'exit' || trimmed.toLowerCase() === 'quit') {
+      await shutdown('\nGoodbye. Stay productive.\n');
+      return;
+    }
+
+    if (trimmed === '') {
       rl.prompt();
       return;
     }
 
-    // Handle help
-    if (trimmed === "/help" || trimmed === "help") {
-      console.log("\n" + bot.getHelp());
+    if (trimmed === '/help' || trimmed === 'help') {
+      console.log('\n' + bot.getHelp());
       rl.prompt();
       return;
     }
 
     try {
-      // Process command
       const response = await bot.processCommand(trimmed);
-
-      // Format and display response
       const formatted = formatResponse(response);
-      console.log("\n" + formatted + "\n");
+      console.log('\n' + formatted + '\n');
     } catch (error) {
-      console.error(
-        "\n❌ Error:",
-        error instanceof Error ? error.message : "Unknown error",
-        "\n",
-      );
+      console.error('\nError:', error instanceof Error ? error.message : 'Unknown error', '\n');
     }
 
     rl.prompt();
+  };
+
+  rl.prompt();
+
+  rl.on('line', (input: string) => {
+    void handleLine(input);
   });
 
-  // Handle errors
-  rl.on("error", (error) => {
-    logger.error("Readline error:", error);
-    console.error("❌ An error occurred. Please try again.");
+  rl.on('error', error => {
+    logger.error('Readline error:', error);
+    console.error('An error occurred. Please try again.');
     rl.prompt();
   });
 
-  // Handle close
-  rl.on("close", async () => {
-    await bot.close();
-    process.exit(0);
+  rl.on('close', () => {
+    void shutdown();
   });
 
-  // Handle process termination
-  process.on("SIGINT", async () => {
-    console.log("\n\n👋 Goodbye! Stay productive!\n");
-    await bot.close();
-    process.exit(0);
+  process.on('SIGINT', () => {
+    void shutdown('\n\nGoodbye. Stay productive.\n');
   });
 
-  process.on("SIGTERM", async () => {
-    logger.info("SIGTERM received, shutting down gracefully");
-    await bot.close();
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, shutting down gracefully');
+    void shutdown();
   });
 }
 
-// Start the bot
-main().catch((error) => {
-  logger.error("Fatal error:", error);
-  console.error("❌ Fatal error:", error);
+try {
+  main();
+} catch (error) {
+  logger.error('Fatal error:', error);
+  console.error('Fatal error:', error);
   process.exit(1);
-});
+}

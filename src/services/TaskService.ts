@@ -1,6 +1,6 @@
 // src/services/TaskService.ts
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Task as PrismaTask, Prisma } from '@prisma/client';
 import {
   Task,
   CreateTaskDTO,
@@ -8,8 +8,8 @@ import {
   TaskFilters,
   TaskStatus,
   Priority,
-} from "../types/services.types";
-import { logger } from "../utils/logger";
+} from '../types/services.types';
+import { logger } from '../utils/logger';
 
 /**
  * TaskService handles all business logic related to tasks
@@ -30,7 +30,7 @@ export class TaskService {
    * Create a new task
    */
   async createTask(dto: CreateTaskDTO): Promise<Task> {
-    logger.info("Creating new task", { title: dto.title });
+    logger.info('Creating new task', { title: dto.title });
 
     try {
       const task = await this.prisma.task.create({
@@ -40,15 +40,15 @@ export class TaskService {
           priority: dto.priority || Priority.MEDIUM,
           dueDate: dto.dueDate,
           tags: dto.tags || [],
-          status: "PENDING" as TaskStatus,
+          status: 'PENDING' as TaskStatus,
         },
       });
 
       logger.info(`Task created successfully: ${task.id}`);
       return this.mapToTask(task);
     } catch (error) {
-      logger.error("Failed to create task:", error);
-      throw new Error("Failed to create task");
+      logger.error('Failed to create task:', error);
+      throw new Error('Failed to create task');
     }
   }
 
@@ -64,7 +64,7 @@ export class TaskService {
       return task ? this.mapToTask(task) : null;
     } catch (error) {
       logger.error(`Failed to get task ${id}:`, error);
-      throw new Error("Failed to get task");
+      throw new Error('Failed to get task');
     }
   }
 
@@ -73,7 +73,7 @@ export class TaskService {
    */
   async getTasks(filters?: TaskFilters): Promise<Task[]> {
     try {
-      const where: any = {};
+      const where: Prisma.TaskWhereInput = {};
 
       if (filters?.status) {
         where.status = filters.status;
@@ -89,33 +89,28 @@ export class TaskService {
         };
       }
 
+      const dueDateFilter: Prisma.DateTimeNullableFilter = {};
       if (filters?.dueBefore) {
-        where.dueDate = {
-          ...where.dueDate,
-          lte: filters.dueBefore,
-        };
+        dueDateFilter.lte = filters.dueBefore;
       }
 
       if (filters?.dueAfter) {
-        where.dueDate = {
-          ...where.dueDate,
-          gte: filters.dueAfter,
-        };
+        dueDateFilter.gte = filters.dueAfter;
+      }
+
+      if (filters?.dueBefore || filters?.dueAfter) {
+        where.dueDate = dueDateFilter;
       }
 
       const tasks = await this.prisma.task.findMany({
         where,
-        orderBy: [
-          { priority: "desc" },
-          { dueDate: "asc" },
-          { createdAt: "desc" },
-        ],
+        orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
       });
 
-      return tasks.map((task: any) => this.mapToTask(task));
+      return tasks.map(task => this.mapToTask(task));
     } catch (error) {
-      logger.error("Failed to get tasks:", error);
-      throw new Error("Failed to get tasks");
+      logger.error('Failed to get tasks:', error);
+      throw new Error('Failed to get tasks');
     }
   }
 
@@ -164,7 +159,7 @@ export class TaskService {
     logger.info(`Completing task ${id}`);
 
     return this.updateTask(id, {
-      status: "COMPLETED" as TaskStatus,
+      status: 'COMPLETED' as TaskStatus,
     });
   }
 
@@ -182,7 +177,7 @@ export class TaskService {
       logger.info(`Task ${id} deleted successfully`);
     } catch (error) {
       logger.error(`Failed to delete task ${id}:`, error);
-      throw new Error("Failed to delete task");
+      throw new Error('Failed to delete task');
     }
   }
 
@@ -191,26 +186,31 @@ export class TaskService {
    */
   async getTaskCountByStatus(): Promise<Record<TaskStatus, number>> {
     try {
-      const counts = await this.prisma.task.groupBy({
-        by: ["status"],
+      const countsRaw = await this.prisma.task.groupBy({
+        by: ['status'],
         _count: true,
       });
+      const counts = countsRaw as Array<{
+        status: TaskStatus;
+        _count: number | { _all: number };
+      }>;
 
-      const result: Record<string, number> = {
-        PENDING: 0,
-        IN_PROGRESS: 0,
-        COMPLETED: 0,
-        CANCELLED: 0,
+      const result: Record<TaskStatus, number> = {
+        [TaskStatus.PENDING]: 0,
+        [TaskStatus.IN_PROGRESS]: 0,
+        [TaskStatus.COMPLETED]: 0,
+        [TaskStatus.CANCELLED]: 0,
       };
 
-      counts.forEach((count: any) => {
-        result[count.status] = count._count;
+      counts.forEach(count => {
+        const countValue = typeof count._count === 'number' ? count._count : count._count._all;
+        result[count.status] = countValue;
       });
 
-      return result as any;
+      return result;
     } catch (error) {
-      logger.error("Failed to get task counts:", error);
-      throw new Error("Failed to get task counts");
+      logger.error('Failed to get task counts:', error);
+      throw new Error('Failed to get task counts');
     }
   }
 
@@ -250,24 +250,24 @@ export class TaskService {
       const tasks = await this.prisma.task.findMany({
         where: {
           OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { description: { contains: query, mode: "insensitive" } },
+            { title: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } },
           ],
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       });
 
-      return tasks.map((task: any) => this.mapToTask(task));
+      return tasks.map(task => this.mapToTask(task));
     } catch (error) {
-      logger.error("Failed to search tasks:", error);
-      throw new Error("Failed to search tasks");
+      logger.error('Failed to search tasks:', error);
+      throw new Error('Failed to search tasks');
     }
   }
 
   /**
    * Map Prisma task to service Task type
    */
-  private mapToTask(task: any): Task {
+  private mapToTask(task: PrismaTask): Task {
     return {
       id: task.id,
       title: task.title,

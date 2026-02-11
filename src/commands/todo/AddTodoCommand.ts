@@ -1,10 +1,10 @@
 // src/commands/todo/AddTodoCommand.ts
 
-import { Command } from "../base/Command";
-import { CommandContext, CommandResponse } from "../../types/commands.types";
-import { TaskService } from "../../services/TaskService";
-import { Priority } from "../../types/services.types";
-import { logger } from "../../utils/logger";
+import { Command } from '../base/Command';
+import { CommandContext, CommandResponse } from '../../types/commands.types';
+import { TaskService } from '../../services/TaskService';
+import { Priority, Task } from '../../types/services.types';
+import { logger } from '../../utils/logger';
 
 /**
  * AddTodoCommand - Create a new task
@@ -17,8 +17,8 @@ import { logger } from "../../utils/logger";
  *   --description: task description
  */
 export class AddTodoCommand extends Command {
-  readonly name = "todo-add";
-  readonly description = "Add a new task to your todo list";
+  readonly name = 'todo-add';
+  readonly description = 'Add a new task to your todo list';
   readonly usage =
     '/todo add "<title>" [--priority=high] [--due=2024-12-31] [--tags=urgent,backend]';
   readonly examples = [
@@ -39,9 +39,9 @@ export class AddTodoCommand extends Command {
    * Validate command input
    */
   validate(context: CommandContext): boolean {
-    const title = context.args.get("title") || context.args.get("0");
+    const title = context.args.get('title') || context.args.get('0');
 
-    if (!title || typeof title !== "string") {
+    if (!title || typeof title !== 'string') {
       return false;
     }
 
@@ -50,8 +50,8 @@ export class AddTodoCommand extends Command {
     }
 
     // Validate priority if provided
-    const priority = context.args.get("priority") || context.args.get("p");
-    if (priority && !["low", "medium", "high"].includes(priority as string)) {
+    const priority = context.args.get('priority') || context.args.get('p');
+    if (priority && !['low', 'medium', 'high'].includes(priority as string)) {
       return false;
     }
 
@@ -64,27 +64,21 @@ export class AddTodoCommand extends Command {
   async execute(context: CommandContext): Promise<CommandResponse> {
     try {
       // Extract title (can be positional or named argument)
-      const title = (context.args.get("title") ||
-        context.args.get("0")) as string;
+      const title = (context.args.get('title') || context.args.get('0')) as string;
 
       // Extract optional arguments
-      const description = context.args.get("description") as string | undefined;
+      const description = context.args.get('description') as string | undefined;
 
-      const priorityStr = (context.args.get("priority") ||
-        context.args.get("p")) as string | undefined;
-      const priority = priorityStr
-        ? this.parsePriority(priorityStr)
-        : Priority.MEDIUM;
-
-      const dueStr = (context.args.get("due") || context.args.get("d")) as
+      const priorityStr = (context.args.get('priority') || context.args.get('p')) as
         | string
         | undefined;
+      const priority = priorityStr ? this.parsePriority(priorityStr) : Priority.MEDIUM;
+
+      const dueStr = (context.args.get('due') || context.args.get('d')) as string | undefined;
       const dueDate = dueStr ? this.parseDate(dueStr) : undefined;
 
-      const tagsStr = (context.args.get("tags") || context.args.get("t")) as
-        | string
-        | undefined;
-      const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()) : [];
+      const tagsStr = (context.args.get('tags') || context.args.get('t')) as string | undefined;
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
 
       // Create task
       const task = await this.taskService.createTask({
@@ -100,10 +94,10 @@ export class AddTodoCommand extends Command {
 
       return this.success(message, task);
     } catch (error) {
-      logger.error("Error in AddTodoCommand:", error);
+      logger.error('Error in AddTodoCommand:', error);
       return this.error(
-        "Failed to create task",
-        error instanceof Error ? error.message : "Unknown error",
+        'Failed to create task',
+        error instanceof Error ? error.message : 'Unknown error'
       );
     }
   }
@@ -114,11 +108,11 @@ export class AddTodoCommand extends Command {
   private parsePriority(priorityStr: string): Priority {
     const normalized = priorityStr.toLowerCase();
     switch (normalized) {
-      case "low":
+      case 'low':
         return Priority.LOW;
-      case "high":
+      case 'high':
         return Priority.HIGH;
-      case "medium":
+      case 'medium':
       default:
         return Priority.MEDIUM;
     }
@@ -131,11 +125,11 @@ export class AddTodoCommand extends Command {
     // Support formats: YYYY-MM-DD, tomorrow, today
     const lower = dateStr.toLowerCase();
 
-    if (lower === "today") {
+    if (lower === 'today') {
       return new Date();
     }
 
-    if (lower === "tomorrow") {
+    if (lower === 'tomorrow') {
       const date = new Date();
       date.setDate(date.getDate() + 1);
       return date;
@@ -144,9 +138,7 @@ export class AddTodoCommand extends Command {
     // Try parsing as ISO date
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) {
-      throw new Error(
-        `Invalid date format: ${dateStr}. Use YYYY-MM-DD, "today", or "tomorrow"`,
-      );
+      throw new Error(`Invalid date format: ${dateStr}. Use YYYY-MM-DD, "today", or "tomorrow"`);
     }
 
     return date;
@@ -155,7 +147,7 @@ export class AddTodoCommand extends Command {
   /**
    * Format task created message
    */
-  private formatTaskCreated(task: any): string {
+  private formatTaskCreated(task: Task): string {
     let message = `✅ Task created successfully!\n\n`;
     message += `**ID:** ${task.id}\n`;
     message += `**Title:** ${task.title}\n`;
@@ -171,7 +163,7 @@ export class AddTodoCommand extends Command {
     }
 
     if (task.tags && task.tags.length > 0) {
-      message += `**Tags:** ${task.tags.join(", ")}\n`;
+      message += `**Tags:** ${task.tags.join(', ')}\n`;
     }
 
     return message;
@@ -182,9 +174,9 @@ export class AddTodoCommand extends Command {
    */
   private formatPriority(priority: Priority): string {
     const icons = {
-      [Priority.LOW]: "🟢 Low",
-      [Priority.MEDIUM]: "🟡 Medium",
-      [Priority.HIGH]: "🔴 High",
+      [Priority.LOW]: '🟢 Low',
+      [Priority.MEDIUM]: '🟡 Medium',
+      [Priority.HIGH]: '🔴 High',
     };
     return icons[priority];
   }
@@ -193,10 +185,10 @@ export class AddTodoCommand extends Command {
    * Format date for display
    */
   private formatDate(date: Date): string {
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     }).format(new Date(date));
   }
 }

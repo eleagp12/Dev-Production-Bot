@@ -1,6 +1,6 @@
 // src/utils/parser.ts
 
-import { CommandContext } from "../types/commands.types";
+import { CommandContext } from '../types/commands.types';
 
 /**
  * Parse command string into command name and arguments
@@ -13,19 +13,18 @@ export function parseCommand(input: string): {
   const trimmed = input.trim();
 
   // Remove leading slash if present
-  const withoutSlash = trimmed.startsWith("/") ? trimmed.slice(1) : trimmed;
+  const withoutSlash = trimmed.startsWith('/') ? trimmed.slice(1) : trimmed;
 
   // Split into parts
   const parts = withoutSlash.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
 
   if (parts.length === 0 || !parts[0]) {
-    throw new Error("Empty command");
+    throw new Error('Empty command');
   }
 
   // Extract command and subcommand
   const command = parts[0];
-  const subcommand =
-    parts.length > 1 && !parts[1].startsWith("-") ? parts[1] : undefined;
+  const subcommand = parts.length > 1 && !parts[1].startsWith('-') ? parts[1] : undefined;
 
   // Parse arguments
   const args = new Map<string, string | boolean | number | string[]>();
@@ -36,7 +35,7 @@ export function parseCommand(input: string): {
   for (let i = startIndex; i < parts.length; i++) {
     const part = parts[i];
 
-    if (part.startsWith("--")) {
+    if (part.startsWith('--')) {
       // Long option: --key=value or --key
       const match = part.match(/^--([^=]+)(?:=(.+))?$/);
       if (match) {
@@ -50,18 +49,14 @@ export function parseCommand(input: string): {
           args.set(key, parsedValue);
         }
       }
-    } else if (part.startsWith("-")) {
+    } else if (part.startsWith('-')) {
       // Short option
       const match = part.match(/^-([a-zA-Z])(?:=(.+))?$/);
       if (match) {
         const key = match[1];
         const value = match[2];
 
-        if (
-          value === undefined &&
-          i + 1 < parts.length &&
-          !parts[i + 1].startsWith("-")
-        ) {
+        if (value === undefined && i + 1 < parts.length && !parts[i + 1].startsWith('-')) {
           const parsedValue = parseValue(parts[i + 1]);
           args.set(key, parsedValue);
           i++;
@@ -74,8 +69,7 @@ export function parseCommand(input: string): {
       }
     } else {
       // Positional argument
-      const cleanValue =
-        part.startsWith('"') && part.endsWith('"') ? part.slice(1, -1) : part;
+      const cleanValue = part.startsWith('"') && part.endsWith('"') ? part.slice(1, -1) : part;
 
       args.set(positionalIndex.toString(), cleanValue);
       positionalIndex++;
@@ -93,11 +87,10 @@ export function parseCommand(input: string): {
 }
 
 function parseValue(value: string): string | number | string[] {
-  const cleaned =
-    value.startsWith('"') && value.endsWith('"') ? value.slice(1, -1) : value;
+  const cleaned = value.startsWith('"') && value.endsWith('"') ? value.slice(1, -1) : value;
 
-  if (cleaned.includes(",")) {
-    return cleaned.split(",").map((v) => v.trim());
+  if (cleaned.includes(',')) {
+    return cleaned.split(',').map(v => v.trim());
   }
 
   const num = Number(cleaned);
@@ -113,7 +106,7 @@ export function formatResponse(response: {
   message: string;
   error?: string;
 }): string {
-  let formatted = response.success ? "✅ " : "❌ ";
+  let formatted = response.success ? '✅ ' : '❌ ';
   formatted += response.message;
 
   if (response.error) {
@@ -128,7 +121,7 @@ export function validateCommand(input: string): boolean {
     return false;
   }
 
-  if (!input.trim().startsWith("/")) {
+  if (!input.trim().startsWith('/')) {
     return false;
   }
 
