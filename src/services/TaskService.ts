@@ -1,5 +1,3 @@
-// src/services/TaskService.ts
-
 import { PrismaClient, Prisma } from '@prisma/client';
 import {
   Task,
@@ -11,14 +9,6 @@ import {
 } from '../types/services.types';
 import { logger } from '../utils/logger';
 
-/**
- * TaskService handles all business logic related to tasks
- *
- * Responsibilities:
- * - Create, read, update, delete tasks
- * - Filter and search tasks
- * - Task statistics
- */
 export class TaskService {
   private prisma: PrismaClient;
 
@@ -114,9 +104,6 @@ export class TaskService {
     }
   }
 
-  /**
-   * Update a task
-   */
   async updateTask(id: number, dto: UpdateTaskDTO): Promise<Task> {
     logger.info(`Updating task ${id}`, dto);
 
