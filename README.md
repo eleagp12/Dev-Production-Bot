@@ -310,15 +310,15 @@ npm run lint
 ```
 
 ## 🔧 Configuration
-
+git tag
 ### Environment Variables
 
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/productivity_bot
+DATABASE_URL=postgresSQL.....
 
 # Redis (optional - for timers)
-REDIS_URL=redis://localhost:6379
+REDIS_URL=redis://localhost:
 
 # Bot Configuration
 BOT_NAME=DevBot
