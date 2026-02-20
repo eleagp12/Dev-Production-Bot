@@ -5,20 +5,18 @@ import { CommandRegistry } from './commands/base/CommandRegistry';
 import { AddTodoCommand } from './commands/todo/AddTodoCommand';
 import { ListTodoCommand } from './commands/todo/ListTodoCommand';
 import { DoneTodoCommand } from './commands/todo/DoneTodoCommand';
-import { DeleteTodoCommand } from './commands/todo/DeleteTodoCommand';
 import { TaskService } from './services/TaskService';
 import { CommandResponse } from './types/commands.types';
-import { parseCommand } from './utils/parser';
+import { parseCommand, formatResponse } from './utils/parser';
 import { logger } from './utils/logger';
 
 /**
  * DevProductivityBot - Main bot orchestrator
  *
- * Phase 2: Todo Management Complete
- * - /todo add - Create tasks
- * - /todo list - List and filter tasks
- * - /todo done - Complete tasks
- * - /todo delete - Remove tasks
+ * Responsibilities:
+ * - Initialize services and commands
+ * - Route commands to appropriate handlers
+ * - Manage database connections
  */
 export class DevProductivityBot {
   private prisma: PrismaClient;
@@ -40,25 +38,22 @@ export class DevProductivityBot {
     // Register commands
     this.registerCommands();
 
-    logger.info('DevProductivityBot initialized successfully - Phase 2');
+    logger.info('DevProductivityBot initialized successfully');
   }
 
   /**
    * Register all commands
    */
   private registerCommands(): void {
-    // Todo commands (Phase 2)
+    // Todo commands
     this.commandRegistry.register(new AddTodoCommand(this.taskService));
     this.commandRegistry.register(new ListTodoCommand(this.taskService));
     this.commandRegistry.register(new DoneTodoCommand(this.taskService));
-    this.commandRegistry.register(new DeleteTodoCommand(this.taskService));
 
-    logger.info('Registered 4 todo commands');
-
-    // Future phases:
-    // Phase 3: Focus commands
-    // Phase 4: Reminder commands
-    // Phase 5: Stats commands
+    // Future commands can be registered here:
+    // - Focus commands
+    // - Reminder commands
+    // - Stats commands
   }
 
   /**
@@ -77,9 +72,7 @@ export class DevProductivityBot {
       // Execute command
       const response = await this.commandRegistry.execute(fullCommandName, context);
 
-      logger.info(`Command processed: ${fullCommandName}`, {
-        success: response.success,
-      });
+      logger.info(`Command processed: ${fullCommandName}`, { success: response.success });
 
       return response;
     } catch (error) {
@@ -105,19 +98,6 @@ export class DevProductivityBot {
    */
   getCommandHelp(commandName: string): string {
     return this.commandRegistry.getCommandHelp(commandName);
-  }
-
-  /**
-   * Get bot statistics
-   */
-  async getStats() {
-    const taskCounts = await this.taskService.getTaskCountByStatus();
-
-    return {
-      totalCommands: this.commandRegistry.getCommandNames().length,
-      taskCounts,
-      version: '0.2.0', // Phase 2 complete
-    };
   }
 
   /**

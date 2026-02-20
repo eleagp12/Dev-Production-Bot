@@ -1,5 +1,7 @@
 // src/types/services.types.ts
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
 export enum TaskStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -18,6 +20,8 @@ export enum ReminderFrequency {
   WEEKLY = 'WEEKLY',
   MONTHLY = 'MONTHLY',
 }
+
+// ─── Task Types ───────────────────────────────────────────────────────────────
 
 export interface CreateTaskDTO {
   title: string;
@@ -57,6 +61,13 @@ export interface Task {
   completedAt?: Date;
 }
 
+// ─── Focus Session Types ──────────────────────────────────────────────────────
+
+export interface CreateFocusSessionDTO {
+  duration: number;
+  breakTime?: number;
+}
+
 export interface FocusSession {
   id: number;
   duration: number;
@@ -67,11 +78,6 @@ export interface FocusSession {
   notes?: string;
 }
 
-export interface CreateFocusSessionDTO {
-  duration: number;
-  breakTime?: number;
-}
-
 export interface FocusStats {
   totalSessions: number;
   totalMinutes: number;
@@ -79,6 +85,15 @@ export interface FocusStats {
   completionRate: number;
   longestStreak: number;
   currentStreak: number;
+}
+
+// ─── Reminder Types ───────────────────────────────────────────────────────────
+
+export interface CreateReminderDTO {
+  message: string;
+  scheduledFor: Date;
+  recurring?: boolean;
+  frequency?: ReminderFrequency;
 }
 
 export interface Reminder {
@@ -92,12 +107,7 @@ export interface Reminder {
   createdAt: Date;
 }
 
-export interface CreateReminderDTO {
-  message: string;
-  scheduledFor: Date;
-  recurring?: boolean;
-  frequency?: ReminderFrequency;
-}
+// ─── Stats Types ──────────────────────────────────────────────────────────────
 
 export interface ProductivityStats {
   date: Date;
