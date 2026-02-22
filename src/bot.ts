@@ -1,59 +1,97 @@
-// src/bot.ts
+// src/bot.ts - FINAL VERSION
 
 import { PrismaClient } from '@prisma/client';
 import { CommandRegistry } from './commands/base/CommandRegistry';
+
+// Phase 2 - Todo commands
 import { AddTodoCommand } from './commands/todo/AddTodoCommand';
 import { ListTodoCommand } from './commands/todo/ListTodoCommand';
 import { DoneTodoCommand } from './commands/todo/DoneTodoCommand';
+import { DeleteTodoCommand } from './commands/todo/DeleteTodoCommand';
+
+// Phase 3 - Focus commands
+import { StartFocusCommand } from './commands/focus/StartFocusCommand';
+import { StopFocusCommand } from './commands/focus/StopFocusCommand';
+import { FocusStatsCommand } from './commands/focus/FocusStatsCommand';
+
+// Phase 4 - Remind commands
+import { CreateReminderCommand } from './commands/remind/CreateReminderCommand';
+import { ListRemindersCommand } from './commands/remind/ListRemindersCommand';
+import { CancelReminderCommand } from './commands/remind/CancelReminderCommand';
+
+// Phase 5 - Stats command
+import { StatsCommand } from './commands/stats/StatsCommand';
+
+// Services
 import { TaskService } from './services/TaskService';
+import { FocusService } from './services/FocusService';
+import { ReminderService } from './services/ReminderService';
+import { StatsService } from './services/StatsService';
+
 import { CommandResponse } from './types/commands.types';
-import { parseCommand, formatResponse } from './utils/parser';
+import { parseCommand } from './utils/parser';
 import { logger } from './utils/logger';
 
 /**
- * DevProductivityBot - Main bot orchestrator
+ * DevProductivityBot - Complete Production Bot
  *
- * Responsibilities:
- * - Initialize services and commands
- * - Route commands to appropriate handlers
- * - Manage database connections
+ * ✅ Phase 2: Todo Management
+ * ✅ Phase 3: Focus Sessions
+ * ✅ Phase 4: Reminders
+ * ✅ Phase 5: Stats & Analytics
+ *
+ * Total: 11 Commands, 4 Services, Production Ready!
  */
 export class DevProductivityBot {
   private prisma: PrismaClient;
   private commandRegistry: CommandRegistry;
   private taskService: TaskService;
+  private focusService: FocusService;
+  private reminderService: ReminderService;
+  private statsService: StatsService;
 
   constructor() {
-    // Initialize Prisma
     this.prisma = new PrismaClient({
       log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
 
-    // Initialize services
+    // Initialize all services
     this.taskService = new TaskService(this.prisma);
+    this.focusService = new FocusService(this.prisma);
+    this.reminderService = new ReminderService(this.prisma);
+    this.statsService = new StatsService(this.prisma);
 
-    // Initialize command registry
+    // Command registry
     this.commandRegistry = new CommandRegistry();
-
-    // Register commands
     this.registerCommands();
 
-    logger.info('DevProductivityBot initialized successfully');
+    logger.info('🎉 DevProductivityBot initialized - ALL PHASES COMPLETE');
   }
 
   /**
-   * Register all commands
+   * Register all 11 commands
    */
   private registerCommands(): void {
-    // Todo commands
+    // Phase 2 - Todo commands (4)
     this.commandRegistry.register(new AddTodoCommand(this.taskService));
     this.commandRegistry.register(new ListTodoCommand(this.taskService));
     this.commandRegistry.register(new DoneTodoCommand(this.taskService));
+    this.commandRegistry.register(new DeleteTodoCommand(this.taskService));
 
-    // Future commands can be registered here:
-    // - Focus commands
-    // - Reminder commands
-    // - Stats commands
+    // Phase 3 - Focus commands (3)
+    this.commandRegistry.register(new StartFocusCommand(this.focusService));
+    this.commandRegistry.register(new StopFocusCommand(this.focusService));
+    this.commandRegistry.register(new FocusStatsCommand(this.focusService));
+
+    // Phase 4 - Remind commands (3)
+    this.commandRegistry.register(new CreateReminderCommand(this.reminderService));
+    this.commandRegistry.register(new ListRemindersCommand(this.reminderService));
+    this.commandRegistry.register(new CancelReminderCommand(this.reminderService));
+
+    // Phase 5 - Stats command (1)
+    this.commandRegistry.register(new StatsCommand(this.statsService));
+
+    logger.info('✅ Registered 11 commands (4 todo + 3 focus + 3 remind + 1 stats)');
   }
 
   /**
@@ -63,21 +101,14 @@ export class DevProductivityBot {
     try {
       logger.info(`Processing command: ${input}`);
 
-      // Parse command
       const { command, subcommand, context } = parseCommand(input);
-
-      // Build full command name
       const fullCommandName = subcommand ? `${command}-${subcommand}` : command;
-
-      // Execute command
       const response = await this.commandRegistry.execute(fullCommandName, context);
 
       logger.info(`Command processed: ${fullCommandName}`, { success: response.success });
-
       return response;
     } catch (error) {
       logger.error('Error processing command:', error);
-
       return {
         success: false,
         message: 'Failed to process command',
@@ -86,23 +117,14 @@ export class DevProductivityBot {
     }
   }
 
-  /**
-   * Get help text
-   */
   getHelp(): string {
     return this.commandRegistry.getHelpText();
   }
 
-  /**
-   * Get help for specific command
-   */
   getCommandHelp(commandName: string): string {
     return this.commandRegistry.getCommandHelp(commandName);
   }
 
-  /**
-   * Close database connection
-   */
   async close(): Promise<void> {
     await this.prisma.$disconnect();
     logger.info('Database connection closed');
