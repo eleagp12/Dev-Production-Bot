@@ -36,64 +36,79 @@ A personal productivity assistant for developers built with TypeScript and Node.
 
 ```
 dev-productivity-bot/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── prisma/
+│   ├── migrations/
+│   │   └── .gitkeep
+│   └── schema.prisma
+│
 ├── src/
-│   ├── commands/              # Command handlers
+│   ├── commands/
 │   │   ├── base/
-│   │   │   ├── Command.ts     # Base command interface
+│   │   │   ├── Command.ts
 │   │   │   └── CommandRegistry.ts
+│   │   │
 │   │   ├── todo/
 │   │   │   ├── AddTodoCommand.ts
 │   │   │   ├── ListTodoCommand.ts
 │   │   │   ├── DoneTodoCommand.ts
 │   │   │   └── DeleteTodoCommand.ts
+│   │   │
 │   │   ├── focus/
 │   │   │   ├── StartFocusCommand.ts
 │   │   │   ├── StopFocusCommand.ts
 │   │   │   └── FocusStatsCommand.ts
+│   │   │
 │   │   ├── remind/
 │   │   │   ├── CreateReminderCommand.ts
-│   │   │   └── ListRemindersCommand.ts
+│   │   │   ├── ListRemindersCommand.ts
+│   │   │   └── CancelReminderCommand.ts
+│   │   │
 │   │   └── stats/
 │   │       └── StatsCommand.ts
-│   ├── services/              # Business logic
+│   │
+│   ├── services/
 │   │   ├── TaskService.ts
 │   │   ├── FocusService.ts
 │   │   ├── ReminderService.ts
 │   │   └── StatsService.ts
-│   ├── repositories/          # Data access layer
-│   │   ├── TaskRepository.ts
-│   │   ├── FocusSessionRepository.ts
-│   │   └── ReminderRepository.ts
-│   ├── models/                # Data models
-│   │   ├── Task.ts
-│   │   ├── FocusSession.ts
-│   │   └── Reminder.ts
-│   ├── database/              # Database setup
-│   │   ├── connection.ts
-│   │   └── migrations/
-│   ├── utils/
-│   │   ├── logger.ts
-│   │   ├── parser.ts
-│   │   ├── validator.ts
-│   │   └── formatter.ts
+│   │
 │   ├── types/
 │   │   ├── commands.types.ts
-│   │   ├── services.types.ts
-│   │   └── database.types.ts
-│   ├── bot.ts                 # Main bot orchestrator
-│   └── index.ts               # Entry point
+│   │   └── services.types.ts
+│   │
+│   ├── utils/
+│   │   ├── logger.ts
+│   │   └── parser.ts
+│   │
+│   ├── bot.ts
+│   └── index.ts
+│
 ├── tests/
-│   ├── unit/
-│   │   ├── services/
-│   │   └── commands/
-│   └── integration/
-├── prisma/                    # Prisma schema
-│   └── schema.prisma
+│   └── unit/
+│       ├── commands/
+│       │   ├── TodoCommands.test.ts
+│       │   └── FocusCommands.test.ts
+│       │
+│       └── services/
+│           ├── TaskService.test.ts
+│           └── FocusService.test.ts
+│
+├── logs/
+│   └── .gitkeep
+│
 ├── .env.example
+├── .eslintrc.js
 ├── .gitignore
-├── tsconfig.json
+├── .prettierrc
 ├── jest.config.ts
 ├── package.json
+├── tsconfig.json
+├── LICENSE
 └── README.md
 ```
 
@@ -310,7 +325,9 @@ npm run lint
 ```
 
 ## 🔧 Configuration
+
 git tag
+
 ### Environment Variables
 
 ```env
